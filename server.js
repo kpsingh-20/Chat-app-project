@@ -1,12 +1,11 @@
 const path = require('path');
 const express = require('express');
-
-const formatMsg = require('./utils/formatMessage');
 const http = require('http');
+const formatMsg = require('./utils/formatMessage');
+const {userjoin, getCurrentUser, userLeaves, roomUsers} = require('./users');
 
 const socketio = require('socket.io');
 const { log } = require('console');
-
 
 const app = express();
 const server = http.createServer(app);
@@ -19,20 +18,34 @@ app.use(express.static(__dirname + "/public"));
 // when clint connects..
 io.on('connection', socket=>{
 
-    socket.emit('message', formatMsg('bot', 'Welcome to chatApp!'));          // Only to user
+    socket.on('joinRoom', ({username, room})=>{
 
-    //BroadCast when a user connects.   // broadcast to everybody expect user.
-    socket.broadcast.emit('message', formatMsg('bot','A user has joined the chat'));
+        const user = userjoin(socket.id, username, room);
 
-    
+        socket.join(user.room);
+
+        // welcome
+        socket.emit('message', formatMsg('bot', 'Welcome to chatApp!'));          // Only to user
+
+        //BroadCast when a user connects.   // broadcast to everybody expect user.
+        socket.broadcast.to(user.room).emit('message', formatMsg('bot',`${user.username} has joined the chat`));
+
+    }) 
+
     socket.on('chatMessage', msg=>{
-        io.emit('message', formatMsg('user', msg));
+        const user = getCurrentUser(socket.id);
+        // console.log(user);
+        io.to(user.room).emit('message', formatMsg(user.username, msg));
     });
 
 
     // BroadCast message from user.     // broadCast to everybody.
     socket.on('disconnect',() =>{
-        io.emit('message', formatMsg('bot', 'User has left the chat.'));
+        const user = userLeaves(socket.id);
+        if(user){
+            io.to(user.room).emit('message', formatMsg('bot', `${user.username} has left the chat.`));
+        }
+        
     });
 });
 
