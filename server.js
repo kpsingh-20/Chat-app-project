@@ -5,7 +5,7 @@ const formatMsg = require('./utils/formatMessage');
 const {userjoin, getCurrentUser, userLeaves, getRoomUsers} = require('./users');
 
 const socketio = require('socket.io');
-const { log } = require('console');
+// const { log } = require('console');
 
 const app = express();
 const server = http.createServer(app);
