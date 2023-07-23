@@ -16,7 +16,7 @@ const socket = io();
 socket.emit('joinRoom', {username, room});
 
 socket.on('message', message =>{
-    console.log(message);
+    // console.log(message);
 
     outputMessage(message);
 
@@ -28,7 +28,7 @@ socket.on('message', message =>{
 });
 
 socket.on('roomUsers', message =>{
-    console.log(message);
+    // console.log(message);
 
     updateRoom(message.room);
 
@@ -68,6 +68,8 @@ function updateRoom(room){
 }
 
 function updateUserList(users){
+
+    userList.innerHTML = '';
     for(let i=0; i<users.length; i++){
         // console.log(users[i]);
         const li = document.createElement("li");
