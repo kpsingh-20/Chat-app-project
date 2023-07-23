@@ -2,7 +2,7 @@ const path = require('path');
 const express = require('express');
 const http = require('http');
 const formatMsg = require('./utils/formatMessage');
-const {userjoin, getCurrentUser, userLeaves, roomUsers} = require('./users');
+const {userjoin, getCurrentUser, userLeaves, getRoomUsers} = require('./users');
 
 const socketio = require('socket.io');
 const { log } = require('console');
@@ -30,7 +30,14 @@ io.on('connection', socket=>{
         //BroadCast when a user connects.   // broadcast to everybody expect user.
         socket.broadcast.to(user.room).emit('message', formatMsg('bot',`${user.username} has joined the chat`));
 
-    }) 
+
+        // send users and room info.
+        io.to(user.room).emit('roomUsers', {
+            room : user.room, 
+            users : getRoomUsers(user.room)
+        });
+
+    })
 
     socket.on('chatMessage', msg=>{
         const user = getCurrentUser(socket.id);
@@ -44,7 +51,16 @@ io.on('connection', socket=>{
         const user = userLeaves(socket.id);
         if(user){
             io.to(user.room).emit('message', formatMsg('bot', `${user.username} has left the chat.`));
+
+            // send users and room info.
+            io.to(user.room).emit('roomUsers', {
+                room : user.room, 
+                users : getRoomUsers(user.room)
+            });
         }
+
+        
+        
         
     });
 });

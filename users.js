@@ -25,7 +25,7 @@ function userLeaves(id){
     }
 }
 
-function roomUsers(room){
+function getRoomUsers(room){
     return users.filter(user => user.room === room);
 }
 
@@ -33,5 +33,5 @@ module.exports = {
     userjoin,
     getCurrentUser,
     userLeaves,
-    roomUsers,
+    getRoomUsers
 };
